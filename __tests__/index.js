@@ -34,25 +34,19 @@ describe('Is an instance initialized correctly?', () => {
 
 describe('Are states consistent?', () => {
   it('sets state correctly', () => {
-    let state
-    state = 'hello'
-    q.setState(state)
-    expect(q.state).toEqual(new State(state))
-
-    state = [{test: 'a more complicated object'}]
-    q.setState(state)
-    expect(q.state).toEqual(new State(state))
+    let state1 = 'hello'
+    let state2 = [{test: 'a more complicated object'}]
+    q.setState(state1)
+    expect(q.state).not.toEqual(q.setState(state2).state)
   })
 
   it('hashes state correctly', () => {
-    let state
-    state = 'hello'
-    q.setState(state)
-    expect(q.state.hash).toEqual(new State(state).hash)
-
-    state = [{test: 'a more complicated object'}]
-    q.setState(state)
-    expect(q.state.hash).toEqual(new State(state).hash)
+    let state1 = [{test: 'a more complicated object'}]
+    q.setState(state1)
+    let hash1 = q.state.hash
+    let state2 = 'hello'
+    q.setState(state2)
+    expect(q.setState(state1).state.hash).toEqual(hash1)
   })
 })
 

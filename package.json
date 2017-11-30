@@ -15,7 +15,7 @@
   "bundlesize": [
     {
       "path": "./dist/index.js",
-      "maxSize": "2 kb"
+      "maxSize": "4 kb"
     }
   ],
   "devDependencies": {

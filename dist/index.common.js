@@ -1,8 +1,4 @@
-(function (global, factory) {
-	typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
-	typeof define === 'function' && define.amd ? define(factory) :
-	(global.qlearning = factory());
-}(this, (function () { 'use strict';
+'use strict';
 
 var items = [];
 var History = /** @class */ (function () {
@@ -349,6 +345,4 @@ var QLearning = /** @class */ (function () {
     return QLearning;
 }());
 
-return QLearning;
-
-})));
+module.exports = QLearning;
