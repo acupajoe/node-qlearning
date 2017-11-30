@@ -1,6 +1,6 @@
 {
   "name": "qlearning",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "An implementation of a qlearning algorithm for node environments",
   "repository": "https://github.com/acupajoe/node-qlearning",
   "author": "Joseph Schultz <joseph@acupajoe.io>",

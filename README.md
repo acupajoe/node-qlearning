@@ -5,7 +5,7 @@
 
 -----------
 
-> **DISCLAIMER**: This library is still a **WORK IN PROGRESS**
+> **DISCLAIMER**: This library is still a **WORK IN PROGRESS** and is currently **INCOMPLETE** use at your own risk
 
 Interested in doing reinforcement learning in node.js? Me too.
 
@@ -13,7 +13,7 @@ This is an experimental library to provide an interface for working with Q-Learn
 application.
 
 ```javascript
-import QL from 'node-qlearning'
+import QL from 'qlearning'
 
 const initialState = {x: 0, y: 0}
 const learningRate = 0.35
