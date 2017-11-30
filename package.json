@@ -1,0 +1,44 @@
+{
+  "name": "qlearning",
+  "version": "0.1.0",
+  "description": "An implementation of a qlearning algorithm for node environments",
+  "repository": "https://github.com/acupajoe/node-qlearning",
+  "author": "Joseph Schultz <joseph@acupajoe.io>",
+  "license": "MIT",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "prepublishOnly": "npm run build && npm test",
+    "build": "rollup -c && node dts-bundle",
+    "test": "jest && bundlesize"
+  },
+  "typescript": {
+    "definition": "./dist/index.d.ts"
+  },
+  "bundlesize": [
+    {
+      "path": "./dist/index.js",
+      "maxSize": "2 kb"
+    }
+  ],
+  "devDependencies": {
+    "@types/jest": "^21.1.8",
+    "@types/lodash": "^4.14.86",
+    "@types/node": "^8.0.53",
+    "babel-core": "^6.26.0",
+    "babel-jest": "^21.2.0",
+    "babel-preset-env": "^1.6.1",
+    "bundlesize": "^0.15.3",
+    "dts-bundle": "^0.7.3",
+    "jest": "^21.2.1",
+    "rollup": "^0.52.0",
+    "rollup-plugin-typescript2": "^0.8.4",
+    "rollup-plugin-uglify": "^2.0.1",
+    "standard": "^10.0.3",
+    "typescript": "^2.6.2",
+    "uglify-es": "^3.2.0"
+  },
+  "dependencies": {
+    "lodash": "^4.17.4"
+  }
+}
