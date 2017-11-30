@@ -32,7 +32,7 @@ describe('Is an instance initialized correctly?', () => {
   })
 })
 
-describe('Are assignments done correctly?', () => {
+describe('Are states consistent?', () => {
   it('sets state correctly', () => {
     let state
     state = 'hello'
@@ -53,5 +53,45 @@ describe('Are assignments done correctly?', () => {
     state = [{test: 'a more complicated object'}]
     q.setState(state)
     expect(q.state.hash).toEqual(new State(state).hash)
+  })
+})
+
+describe('Are state functions bound and called?', () => {
+  it('binds arrow functions', () => {
+    let cost = (state, action) => {}
+    let stateGenerator = (state, action) => {}
+    let printer = (state) => {}
+    let reward = (state) => {}
+    q.setStateGenerator(stateGenerator)
+    q.setCost(cost)
+    q.setReward(reward)
+    q.setPrinter(printer)
+    expect(q.functions.stateGenerator).toEqual(stateGenerator)
+    expect(q.functions.stateGenerator).toEqual(stateGenerator)
+    expect(q.functions.stateGenerator).toEqual(stateGenerator)
+    expect(q.functions.stateGenerator).toEqual(stateGenerator)
+  })
+
+  it('binds anonymous functions', () => {
+    let cost = function (state, action) {}
+    let stateGenerator = function (state, action) {}
+    let printer = function (state) {}
+    let reward = function (state) {}
+    q.setStateGenerator(stateGenerator)
+    q.setCost(cost)
+    q.setReward(reward)
+    q.setPrinter(printer)
+    expect(q.functions.stateGenerator).toEqual(stateGenerator)
+    expect(q.functions.stateGenerator).toEqual(stateGenerator)
+    expect(q.functions.stateGenerator).toEqual(stateGenerator)
+    expect(q.functions.stateGenerator).toEqual(stateGenerator)
+  })
+
+  it('rejects binding of non-functions to state functions', () => {
+    let nonFunction = 0
+    expect(() => q.setStateGenerator(nonFunction)).toThrow()
+    expect(() => q.setCost(nonFunction)).toThrow()
+    expect(() => q.setReward(nonFunction)).toThrow()
+    expect(() => q.setPrinter(nonFunction)).toThrow()
   })
 })
