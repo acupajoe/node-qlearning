@@ -8,3 +8,6 @@ install:
 script:
   - npm run build
   - npm test
+
+notifications:
+  email: false
