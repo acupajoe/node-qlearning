@@ -5,29 +5,105 @@ declare module 'qlearning' {
     import State from "qlearning/state";
     import { Policy } from "qlearning/policy";
     class QLearning {
-        name: string;
-        state?: State;
-        actions: Array<object>;
-        alpha: number;
-        policy?: Policy;
-        history: History;
-        functions: {
-            cost?: (state: State, action: object) => number;
-            reward?: (state: State) => number;
-            printer?: (state: State) => void;
-            stateGenerator?: (state: State, action: object) => object;
-        };
-        constructor(name: string, actions: Array<object>, alpha: number);
-        verbose: boolean;
-        setState(state: object): this;
-        setCost(func: (state: State) => number): this;
-        setReward(func: (state: State) => number): this;
-        setPrinter(func: (state: State) => void): this;
-        setStateGenerator(func: (state: State, action: object) => object): this;
-        perceiveState(): this;
-        start(initialState: object): this;
-        learn(): this;
-        step(): this;
+            name: string;
+            state?: State;
+            actions: Array<object>;
+            alpha: number;
+            policy?: Policy;
+            history: History;
+            theta: Policy;
+            functions: {
+                    cost?: (state: State, action: object) => number;
+                    reward?: (state: State) => number;
+                    printer?: (state: State) => void;
+                    stateGenerator?: (state: State, action: object) => object;
+            };
+            constructor(name: string, actions: Array<object>, alpha: number);
+            verbose: boolean;
+            /**
+                * Sets the current state of the agent
+                *
+                * @param {Object} state
+                * @returns {this}
+                */
+            setState(state: object): this;
+            /**
+                * [REQUIRED]
+                * Sets the function for evaluating the cost of the current state
+                *
+                * @param {(state: State, action: Object) => number} func
+                * @returns {this}
+                */
+            setCost(func: (state: State, action: object) => number): this;
+            /**
+                * [REQUIRED]
+                * Sets the function for evaluating the reward of an arbitrary state
+                *
+                * @param {(state: State) => number} func
+                * @returns {this}
+                */
+            setReward(func: (state: State) => number): this;
+            /**
+                * [OPTIONAL]
+                * Printing function that is called after each step
+                *
+                * @param {(state: State) => void} func
+                * @returns {this}
+                */
+            setPrinter(func: (state: State) => void): this;
+            /**
+                * [REQUIRED]
+                * Sets the function for generating a new state given the current state and performing
+                * an action
+                *
+                * @param {(state: State, action: Object) => Object} func
+                * @returns {this}
+                */
+            setStateGenerator(func: (state: State, action: object) => object): this;
+            /**
+                * @returns {this}
+                */
+            perceiveState(): this;
+            /**
+                * [Required]
+                * Begins the QLearning Process
+                * Must be called after state functions are set.
+                *
+                * @param {Object} initialState
+                * @returns {this}
+                */
+            start(initialState: object): this;
+            /**
+                * Learns from the most recent step -> produces new state
+                * Should be called after `step()` and a subsequent call to
+                * `setState(state)` or `perceiveState()`
+                *
+                * @returns {this}
+                */
+            learn(): this;
+            /**
+                * Choose the next `best` action (GREEDY)
+                * @returns {this}
+                */
+            step(): this;
+            /**
+                *
+                * @param {string} path
+                */
+            save(path: string): this;
+            /**
+                *
+                * @param {string} path
+                * @param {string} name
+                * @returns {QLearning}
+                */
+            saveAs(path: string, name: string): this;
+            /**
+                *
+                * @param {string} path
+                * @returns {this}
+                */
+            load(path: string): this;
     }
     export default QLearning;
 }
