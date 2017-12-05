@@ -10,7 +10,8 @@
   "scripts": {
     "prepublishOnly": "npm run build && npm test",
     "build": "rollup -c && node dts-bundle",
-    "test": "jest && bundlesize"
+    "test": "jest && bundlesize",
+    "watch-sample": "babel -w ./sample/agar/src -d ./sample/agar/dist"
   },
   "bundlesize": [
     {
