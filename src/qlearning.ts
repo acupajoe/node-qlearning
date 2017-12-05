@@ -1,10 +1,10 @@
-import History from "./history"
 import State from "./state";
 import {Policy} from "./policy"
 
 const fs = require('fs')
 const colors = require('colors')
 const sortBy = require('lodash').sortBy
+const stringify = require('circular-json').stringify
 
 let isVerbose: boolean = false
 
@@ -20,13 +20,13 @@ class QLearning {
     actions: Array<object>
     alpha: number
     policy?: Policy
-    history: History
+    history: Array<State>
     theta: Policy
     functions: {
-        cost?: (state: State, action: object) => number,
-        reward?: (state: State) => number,
-        printer?: (state: State) => void,
-        stateGenerator?: (state: State, action: object) => object
+        cost?: (state: object, action: object) => number,
+        reward?: (state: object) => number,
+        printer?: (state: object) => void,
+        stateGenerator?: (state: object, action: object) => object
     }
 
     constructor(name: string, actions: Array<object>, alpha: number) {
@@ -35,7 +35,7 @@ class QLearning {
         this.state = null
         this.alpha = alpha || 0.5
         this.policy = {}
-        this.history = new History()
+        this.history = []
         this.functions = {
             cost: null,
             reward: null,
@@ -79,8 +79,8 @@ class QLearning {
      * @returns {this}
      */
     setState(state: object): this {
-        this.state = state instanceof State ? state : <State> new State(state)
-        this.history.push(this.state, null, null)
+        this.state = state instanceof State ? state : <State> new State(state, null, null)
+        this.history.push(this.state)
         return this
     }
 
@@ -88,10 +88,10 @@ class QLearning {
      * [REQUIRED]
      * Sets the function for evaluating the cost of the current state
      *
-     * @param {(state: State, action: Object) => number} func
+     * @param {(state: object, action: Object) => number} func
      * @returns {this}
      */
-    setCost(func: (state: State, action: object) => number): this {
+    setCost(func: (state: object, action: object) => number): this {
         if (typeof func !== 'function') {
             throw new Error('Cost must be defined as a function')
         }
@@ -103,10 +103,10 @@ class QLearning {
      * [REQUIRED]
      * Sets the function for evaluating the reward of an arbitrary state
      *
-     * @param {(state: State) => number} func
+     * @param {(state: object) => number} func
      * @returns {this}
      */
-    setReward(func: (state: State) => number): this {
+    setReward(func: (state: object) => number): this {
         if (typeof func !== 'function') {
             throw new Error('Reward must be defined as a function')
         }
@@ -118,10 +118,10 @@ class QLearning {
      * [OPTIONAL]
      * Printing function that is called after each step
      *
-     * @param {(state: State) => void} func
+     * @param {(state: object) => void} func
      * @returns {this}
      */
-    setPrinter(func: (state: State) => void): this {
+    setPrinter(func: (state: object) => void): this {
         if (typeof func !== 'function') {
             throw new Error('Printer must be defined as a function')
         }
@@ -137,19 +137,11 @@ class QLearning {
      * @param {(state: State, action: Object) => Object} func
      * @returns {this}
      */
-    setStateGenerator(func: (state: State, action: object) => object): this {
+    setStateGenerator(func: (state: object, action: object) => object): this {
         if (typeof func !== 'function') {
             throw new Error('State Generator must be defined as a function')
         }
         this.functions.stateGenerator = func
-        return this
-    }
-
-    /**
-     * @returns {this}
-     */
-    perceiveState(): this {
-        this.history.push(null, this.state, null)
         return this
     }
 
@@ -172,8 +164,8 @@ class QLearning {
             throw new Error('Reward function must be defined before calling `start`')
         }
 
-        this.history.clear()
-        this.setState(initialState)
+        this.history = []
+        this.setState(new State(initialState, null, null))
         return this
     }
 
@@ -196,8 +188,8 @@ class QLearning {
             throw new Error('Agent has not moved - cannot learn yet!')
         }
 
-        last = this.history.items[length - 2]
-        current = this.history.items[length - 1]
+        last = this.history[length - 2]
+        current = this.history[length - 1]
 
         if (last.action === null) {
             throw new Error('Agent should perceive the current state after its last moving')
@@ -207,11 +199,11 @@ class QLearning {
             throw new Error('Agent should update the current state after moving')
         }
 
-        rewardA = this.functions.reward.call(this, last.state)
-        rewardB = this.functions.reward.call(this, current.state)
+        rewardA = this.functions.reward(last.obj)
+        rewardB = this.functions.reward(current.obj)
         delta = this.alpha * (rewardB - rewardA)
 
-        this.__updatePolicy(last.state, last.action, delta)
+        this.__updatePolicy(last, delta)
         return this
     }
 
@@ -232,17 +224,16 @@ class QLearning {
         next = this.__explore(this.state)
         chosen = next[0]
 
-        this.history.push(this.state, chosen.action, null)
+        this.history.push(new State(this.state.obj, chosen.action, null))
 
-        Log(`${this.name}`.red + ` chose action: `.green + chosen.action)
+        Log(`${this.name}`.red + ` chose action: `.green + (chosen.action instanceof String ? chosen.action : stringify(chosen.action)))
 
-        newState = this.functions.stateGenerator(this.state, chosen.action)
+        newState = this.functions.stateGenerator(this.state.obj, chosen.action)
         this.state = newState instanceof State ? newState : <State> new State(newState)
 
         if (this.functions.printer) {
-            this.functions.printer(this.state)
+            this.functions.printer(this.state.obj)
         }
-
         return this
     }
 
@@ -284,10 +275,19 @@ class QLearning {
     }
 
     /**
+     * Have the agent perceive its current state (to be called before and after a step)
+     * @returns {this}
+     */
+    perceiveState(): this {
+        this.history.push(new State(this.state.obj, null, null))
+        return this
+    }
+
+    /**
      * Explores actions to take on states
      *
      * @param {State} state
-     * @returns {any[]} Sorted (DESC) array of {action: object, reward: number}s
+     * @returns {any[]} Sorted (DESC) array of {action: object, reward: number}
      * @private
      */
     private __explore(state: State) {
@@ -302,7 +302,9 @@ class QLearning {
             return {action: a, reward: q}
         })
 
-        return sortBy(rewards, (r) => -r.reward)
+        rewards = sortBy(rewards, (r) => -r.reward)
+        Log("Calculated rewards of: ".yellow + stringify(rewards))
+        return rewards
     }
 
     /**
@@ -315,7 +317,7 @@ class QLearning {
      * @private
      */
     private __predict(state: State, action: object): number {
-        let cost = this.functions.cost(state, action)
+        let cost = this.functions.cost(state.obj, action)
 
         if (cost < 0) {
             return cost
@@ -325,7 +327,7 @@ class QLearning {
         if (this.policy.hasOwnProperty(state.hash)) {
             let act = this.policy[state.hash].filter((a) => a.action = action)
             if (act.length === 0) {
-                return this.functions.cost(state, action)
+                return this.functions.cost(state.obj, action)
             } else {
                 return act[0].reward
             }
@@ -350,21 +352,20 @@ class QLearning {
      * Update policy for a state from the previous observation
      *
      * @param {State} state
-     * @param {Object} action
      * @param {number} sumOfRewards - value to be added
      * @returns {this}
      * @private
      */
-    private __updatePolicy(state: State, action: object, sumOfRewards: number) {
+    private __updatePolicy(state: State, sumOfRewards: number) {
         if (!this.policy.hasOwnProperty(state.hash)) {
             this.policy[state.hash] = []
             this.policy[state.hash] = this.actions.map((a) => {
-                return {action: a, reward: a === action ? sumOfRewards : 0}
+                return {action: a, reward: a === state.action ? sumOfRewards : 0}
             })
         } else {
             this.policy[state.hash] = this.policy[state.hash].map((a) => {
-                if (a.action === action) {
-                    return {action: action, reward: sumOfRewards}
+                if (a.action === state.action) {
+                    return {action: state.action, reward: sumOfRewards}
                 } else {
                     return {action: a.action, reward: a.reward}
                 }
