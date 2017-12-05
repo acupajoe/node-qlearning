@@ -90,23 +90,19 @@ declare module 'qlearning' {
                 */
             step(): this;
             /**
+                * Asynchronously saves an agent to the filesystem,
+                * will make the directory if it does not exist
                 *
-                * @param {string} path
+                * @param {string} directory
+                * @returns {Promise}
                 */
-            save(path: string): this;
+            save(directory: string): Promise<{}>;
             /**
-                *
-                * @param {string} path
-                * @param {string} name
-                * @returns {QLearning}
-                */
-            saveAs(path: string, name: string): this;
-            /**
-                *
-                * @param {string} path
+                * Loads an agent from the filesystem specified by the agent's constructed name
+                * @param {string} directory
                 * @returns {this}
                 */
-            load(path: string): this;
+            loadSync(directory: string): this;
             /**
                 * Have the agent perceive its current state (to be called before and after a step)
                 * @returns {this}

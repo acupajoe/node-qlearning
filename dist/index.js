@@ -22,6 +22,7 @@ var State = /** @class */ (function () {
 }());
 
 var fs = require('fs');
+var path = require('path');
 var colors = require('colors');
 var sortBy = require('lodash').sortBy;
 var stringify = require('circular-json').stringify;
@@ -221,31 +222,44 @@ var QLearning = /** @class */ (function () {
         return this;
     };
     /**
+     * Asynchronously saves an agent to the filesystem,
+     * will make the directory if it does not exist
      *
-     * @param {string} path
+     * @param {string} directory
+     * @returns {Promise}
      */
-    QLearning.prototype.save = function (path) {
-        fs.writeFileSync(path + "/" + this.name + ".agent", JSON.stringify(this.policy));
-        return this;
+    QLearning.prototype.save = function (directory) {
+        var dirPath = path.resolve(directory);
+        return new Promise(function (res, rej) {
+            fs.stat(dirPath, function (err, stats) {
+                if (err) {
+                    fs.mkdir(dirPath, write);
+                }
+                else {
+                    write();
+                }
+            });
+            function write(err) {
+                if (err === void 0) { err = false; }
+                if (!err) {
+                    fs.writeFile(path.join(dirPath, this.name + ".agent"), stringify(this.policy));
+                    res(this);
+                }
+                else {
+                    rej(err);
+                }
+            }
+        });
     };
     /**
-     *
-     * @param {string} path
-     * @param {string} name
-     * @returns {QLearning}
-     */
-    QLearning.prototype.saveAs = function (path, name) {
-        fs.writeFileSync(path + "/" + name + ".agent", JSON.stringify(this.policy));
-        return this;
-    };
-    /**
-     *
-     * @param {string} path
+     * Loads an agent from the filesystem specified by the agent's constructed name
+     * @param {string} directory
      * @returns {this}
      */
-    QLearning.prototype.load = function (path) {
-        if (fs.existsSync(path + "/" + this.name + ".agent")) {
-            var policy = fs.readFileSync(path + "/" + this.name + ".agent");
+    QLearning.prototype.loadSync = function (directory) {
+        var dirPath = path.resolve(directory);
+        if (fs.existsSync(path.join(dirPath, "/" + this.name + ".agent"))) {
+            var policy = fs.readFileSync(dirPath + "/" + this.name + ".agent");
             policy = JSON.parse(policy);
             this.policy = policy;
             Log('Agent Loaded'.green);

@@ -2,6 +2,7 @@ import State from "./state";
 import {Policy} from "./policy"
 
 const fs = require('fs')
+const path = require('path')
 const colors = require('colors')
 const sortBy = require('lodash').sortBy
 const stringify = require('circular-json').stringify
@@ -238,33 +239,44 @@ class QLearning {
     }
 
     /**
+     * Asynchronously saves an agent to the filesystem,
+     * will make the directory if it does not exist
      *
-     * @param {string} path
+     * @param {string} directory
+     * @returns {Promise}
      */
-    save(path: string) {
-        fs.writeFileSync(`${path}/${this.name}.agent`, JSON.stringify(this.policy))
-        return this
+    save(directory: string) {
+        let dirPath = path.resolve(directory)
+
+        return new Promise((res, rej) => {
+            fs.stat(dirPath, (err, stats) => {
+                if (err) {
+                    fs.mkdir(dirPath, write)
+                } else {
+                    write()
+                }
+            })
+
+            function write(err = false) {
+                if (!err) {
+                    fs.writeFile(path.join(dirPath, `${this.name}.agent`), stringify(this.policy))
+                    res(this)
+                } else {
+                    rej(err)
+                }
+            }
+        })
     }
 
     /**
-     *
-     * @param {string} path
-     * @param {string} name
-     * @returns {QLearning}
-     */
-    saveAs(path: string, name: string) {
-        fs.writeFileSync(`${path}/${name}.agent`, JSON.stringify(this.policy))
-        return this
-    }
-
-    /**
-     *
-     * @param {string} path
+     * Loads an agent from the filesystem specified by the agent's constructed name
+     * @param {string} directory
      * @returns {this}
      */
-    load(path: string) {
-        if (fs.existsSync(`${path}/${this.name}.agent`)) {
-            let policy = fs.readFileSync(`${path}/${this.name}.agent`)
+    loadSync(directory: string) {
+        let dirPath = path.resolve(directory)
+        if (fs.existsSync(path.join(dirPath, `/${this.name}.agent`))) {
+            let policy = fs.readFileSync(`${dirPath}/${this.name}.agent`)
             policy = JSON.parse(policy)
             this.policy = policy
 
