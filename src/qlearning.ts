@@ -45,6 +45,29 @@ class QLearning {
         return this
     }
 
+    /**
+     * Needs to be called after state functions are set, binds the context wherein
+     * those functions are called.
+     *
+     * @param {Object} context
+     * @returns {this}
+     */
+    bind(context: object): this {
+        if (this.functions.cost) {
+            this.functions.cost.bind(context)
+        }
+        if (this.functions.reward) {
+            this.functions.reward.bind(context)
+        }
+        if (this.functions.printer) {
+            this.functions.printer.bind(context)
+        }
+        if (this.functions.stateGenerator) {
+            this.functions.stateGenerator.bind(context)
+        }
+        return this;
+    }
+
     set verbose(value: boolean) {
         isVerbose = value
     }
