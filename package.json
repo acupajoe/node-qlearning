@@ -1,6 +1,6 @@
 {
   "name": "qlearning",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "An implementation of a qlearning algorithm for node environments",
   "repository": "https://github.com/acupajoe/node-qlearning",
   "author": "Joseph Schultz <joseph@acupajoe.io>",
@@ -19,6 +19,7 @@
     }
   ],
   "devDependencies": {
+    "@types/circular-json": "^0.4.0",
     "@types/colors": "^1.1.3",
     "@types/jest": "^21.1.8",
     "@types/lodash": "^4.14.86",
@@ -29,15 +30,13 @@
     "bundlesize": "^0.15.3",
     "dts-bundle": "^0.7.3",
     "jest": "^21.2.1",
-    "prompt": "^1.0.0",
     "rollup": "^0.52.0",
     "rollup-plugin-typescript2": "^0.8.4",
-    "rollup-plugin-uglify": "^2.0.1",
     "standard": "^10.0.3",
-    "typescript": "^2.6.2",
-    "uglify-es": "^3.2.0"
+    "typescript": "^2.6.2"
   },
   "dependencies": {
+    "circular-json": "^0.4.0",
     "colors": "^1.1.2",
     "lodash": "^4.17.4"
   }
